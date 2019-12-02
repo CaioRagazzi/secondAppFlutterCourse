@@ -12,6 +12,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Personal Expenses',
       theme: ThemeData(
+          textTheme: ThemeData.light().textTheme.copyWith(
+              title: TextStyle(
+                  fontFamily: 'OpenSans',
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18),
+              button: TextStyle(color: Colors.white)),
           primarySwatch: Colors.purple,
           accentColor: Colors.amber,
           fontFamily: 'Quicksand'),
@@ -34,15 +40,23 @@ class _MyHomePageState extends State<MyHomePage> {
     }).toList();
   }
 
-  void _addTransaction(String title, double amount) {
+  void _addTransaction(String title, double amount, DateTime selectedDate) {
     final newTx = Transaction(
         title: title,
         amount: amount,
         id: DateTime.now().toString(),
-        date: DateTime.now());
+        date: selectedDate);
 
     setState(() {
       _userTransaction.add(newTx);
+    });
+  }
+
+  void _removeTransaction(String id) {
+    setState(() {
+      _userTransaction.removeWhere((item) {
+        return item.id == id;
+      });
     });
   }
 
@@ -76,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Chart(_recentTransactions),
-          TransactionList(_userTransaction),
+          TransactionList(_userTransaction, _removeTransaction),
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
