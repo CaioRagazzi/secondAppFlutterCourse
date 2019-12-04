@@ -40,6 +40,8 @@ class _MyHomePageState extends State<MyHomePage> {
     }).toList();
   }
 
+  bool _showChart = false;
+
   void _addTransaction(String title, double amount, DateTime selectedDate) {
     final newTx = Transaction(
         title: title,
@@ -70,6 +72,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
     final appBar = AppBar(
       title: Text(
         'Personal Expenses',
@@ -84,22 +88,49 @@ class _MyHomePageState extends State<MyHomePage> {
         )
       ],
     );
+    final txListWidget = Container(
+        height: (MediaQuery.of(context).size.height -
+                appBar.preferredSize.height -
+                MediaQuery.of(context).padding.top) *
+            0.7,
+        child: TransactionList(_userTransaction, _removeTransaction));
     return Scaffold(
       appBar: appBar,
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Container(
-              height: (MediaQuery.of(context).size.height -
-                      appBar.preferredSize.height - MediaQuery.of(context).padding.top) *
-                  0.3,
-              child: Chart(_recentTransactions)),
-          Container(
-              height: (MediaQuery.of(context).size.height -
-                      appBar.preferredSize.height - MediaQuery.of(context).padding.top) *
-                  0.7,
-              child: TransactionList(_userTransaction, _removeTransaction)),
+          if (isLandscape)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text('Show Chart'),
+                Switch.adaptive(
+                    value: _showChart,
+                    onChanged: (val) {
+                      setState(() {
+                        _showChart = val;
+                      });
+                    })
+              ],
+            ),
+          if (!isLandscape)
+            Container(
+                height: (MediaQuery.of(context).size.height -
+                        appBar.preferredSize.height -
+                        MediaQuery.of(context).padding.top) *
+                    0.3,
+                child: Chart(_recentTransactions)),
+          if (!isLandscape) txListWidget,
+          if (isLandscape)
+            _showChart
+                ? Container(
+                    height: (MediaQuery.of(context).size.height -
+                            appBar.preferredSize.height -
+                            MediaQuery.of(context).padding.top) *
+                        1,
+                    child: Chart(_recentTransactions))
+                : txListWidget
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
